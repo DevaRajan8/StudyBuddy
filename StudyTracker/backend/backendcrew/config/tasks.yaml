@@ -1,0 +1,147 @@
+organize_resources_task:
+  description: >
+    Organize the student’s notes, reference materials, and resources based on the given query: {query}.
+    Ensure that all materials are categorized logically and are easily accessible.
+    Provide detailed categorization and links or references to each resource.
+
+  expected_output: >
+    A comprehensive list of organized resources, including categories and direct access information.
+    Ensure no duplicates and that all relevant materials are included.
+
+  agent: notebook_resource_manager
+
+create_study_schedule_task:
+  description: >
+    Based on the student's query: {query}, create a personalized study schedule.
+    Consider the student's availability, deadlines, and subjects that require more focus.
+    Incorporate breaks and revision periods in a balanced manner.
+    Provide a clear and detailed schedule.
+
+  expected_output: >
+    A structured study schedule outlining study sessions, breaks, and revision times.
+    Include dates, times, and specific subjects or topics to be covered.
+
+  agent: schedule_agent
+
+analyze_performance_task:
+  description: >
+    Analyze the student's recent performance data provided in the query: {query}.
+    Identify strengths, weaknesses, and areas needing improvement.
+    Provide actionable suggestions to enhance study habits and performance.
+    Use any data available to support the analysis.
+
+  expected_output: >
+    A detailed performance report highlighting key findings.
+    Specific recommendations for improving study techniques, time management, and focus.
+
+  # agent: performance_analyst
+
+miscellaneous_task_handling:
+  description: >
+    Handle miscellaneous queries from the student
+    Use appropriate tools to fetch information or perform calculations.
+    Provide clear and direct answers to the student's questions.
+    User's Query: "{query}".
+
+  expected_output: >
+    A concise and accurate response to the query.
+    Include any relevant information or additional context if necessary.
+
+  agent: misc_agent
+
+route_query_task:
+  description: >
+    Analyze the student's query: {query} and delegate it directly to the most suitable agent.
+    For general or miscellaneous queries like weather information, delegate to the `misc_agent`.
+    Avoid initiating additional tasks unless necessary.
+
+  expected_output: >
+    The manager agent delegates the query to the appropriate agent, who provides a direct response to the student without unnecessary processing.
+
+select_agent_task:
+  description: >
+    Analyze the query: {query} and determine the most appropriate agent to handle it.
+    If the query lacks sufficient context or is too vague, delegate to 'query_clarification_agent'.
+    For example, "Add a Task" must contain task title, description, due date, and priority.
+    Ensure the selected agent can handle the task effectively.
+    Match query keywords and context with agent capabilities.
+    Consider task complexity and specific requirements.
+    Output only the selected agent name.
+
+    Valid agents are: ["notebook_resource_manager", "schedule_agent", "performance_analyst", "misc_agent", "task_agent", "query_clarification_agent"]
+    Invalid decision count: {invalid_count}
+    Maximum retries: 10
+
+  expected_output: >
+    A single string containing the name of the most appropriate agent to handle the task.
+    Must be one of: notebook_resource_manager, schedule_agent, performance_analyst, misc_agent, task_agent
+
+manage_task:
+  description: >
+    Handle task operations dynamically based on the user's input and context: {query}.
+    
+    Operation Types:
+    1. CREATE: Extract task details and create new tasks
+    2. UPDATE: Modify existing tasks using approximate matching
+    3. DELETE: Remove tasks using approximate matching
+    4. RETRIEVE: Find tasks based on various criteria
+    
+    Task Identification:
+    - Use regex patterns to match task titles and descriptions
+    - If context is insufficient, retrieve all tasks first
+    - For ambiguous matches, list potential matches and seek clarification
+    
+    Status-based Operations:
+    - Handle 'completed', 'pending', and 'overdue' task filtering
+    - Support status updates and progress tracking
+    - Consider due dates when determining task status
+    
+    Data Management:
+    - Maintain task structure (title, description, type, due_date, priority, progress, completed)
+    - Ensure data integrity and accurate status tracking
+    - Provide clear feedback about operations performed
+    
+    Response Formatting:
+    - List tasks with relevant details (status, due date, priority)
+    - Sort tasks by due date when retrieving multiple tasks
+    - Include status information in task listings
+    
+    Error Handling:
+    - Provide clear error messages for failed operations
+    - Suggest alternatives when exact matches aren't found
+    - Handle ambiguous cases with appropriate prompts
+
+  expected_output: >
+    Proper Tool use:
+
+    - Follow this format for tasks querying. Some tools support regex patterns for matching task titles and descriptions.
+
+    - For task creation, ensure all necessary details are provided (title, description, type, due date, priority).
+    
+    "title": "Math Homework",
+    "description": "Complete assignments 1-5 in chapter 3",
+    "type": "Homework"/"Assignment"/"Project"/etc
+    "dueDate": "2023-12-01T23:59:00.000Z",
+    "priority": "High"/"Medium"/"Low",
+    "progress": int
+    Detailed response including:
+    - Operation performed and its result
+    - For task listings: status, due dates, and priorities
+    - For updates/deletions: confirmation and affected tasks
+    - For ambiguous cases: list of potential matches
+    - Clear error messages if operations fail
+    - Suggestions for clarification when needed
+
+  agent: task_agent
+
+clarify_query_task:
+  description: >
+    The user's query "{query}" lacks sufficient context or detail to proceed.
+    Engage with the user to request additional information needed to fulfill the request.
+    Ask clear and specific questions to gather necessary details.
+
+  expected_output: >
+    A message prompting the user for more information, including specific questions about what is needed to proceed.
+
+  agent: query_clarification_agent
+
